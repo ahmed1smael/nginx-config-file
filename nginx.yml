@@ -1,0 +1,79 @@
+
+- hosts: all
+  gather_facts: False
+  remote_user: root
+  vars:
+    site_name: "nginx_trial"
+    site_title: "Let's Go"
+    site_url: "www.nginx_trial.com"
+
+  tasks:
+    - name: Install nginx.
+      yum: name=nginx state=latest
+
+    - name: Create website directory
+      file: path="/var/www/{{ site_name }}" state=directory mode=0755
+
+    - name: Create main nginx config file
+      template: src=/home/ahsalman1/Desktop/nginx-install/templates/nginx.conf dest=/etc/nginx/nginx.conf
+      notify:
+      - restart nginx
+        
+    - name: Create nginx vhost config file
+      template: src=/home/ahsalman1/Desktop/nginx-install/templates/website.conf dest=/etc/nginx/conf.d/{{ site_name }}.conf
+      notify:
+      - restart nginx
+        
+    - name: Create website
+      template: src=templates/index.html dest=/var/www/{{ site_name }}/index.html
+
+    - name: Remove default nginx vhost configuration
+      file: path=/etc/nginx/sites-enabled/default state=absent
+      notify:
+      - restart nginx
+
+  handlers:
+    - name: restart nginx
+      service: name=nginx state=restarted
+
+
+
+
+
+
+
+##################################################
+
+ansible-playbook Desktop/nginx-install/nginx.yml -u root
+
+PLAY [all] ********************************************************************************************************************************************************************************************************
+
+TASK [Install nginx.] *********************************************************************************************************************************************************************************************
+ok: [192.168.122.90]
+ok: [192.168.122.63]
+
+TASK [Create website directory] ***********************************************************************************************************************************************************************************
+ok: [192.168.122.90]
+ok: [192.168.122.63]
+
+TASK [Create main nginx config file] ******************************************************************************************************************************************************************************
+ok: [192.168.122.90]
+ok: [192.168.122.63]
+
+TASK [Create nginx vhost config file] *****************************************************************************************************************************************************************************
+ok: [192.168.122.90]
+ok: [192.168.122.63]
+
+TASK [Create website] *********************************************************************************************************************************************************************************************
+ok: [192.168.122.90]
+ok: [192.168.122.63]
+
+TASK [Remove default nginx vhost configuration] *******************************************************************************************************************************************************************
+ok: [192.168.122.90]
+ok: [192.168.122.63]
+
+PLAY RECAP ********************************************************************************************************************************************************************************************************
+192.168.122.63             : ok=6    changed=0    unreachable=0    failed=0   
+192.168.122.90             : ok=6    changed=0    unreachable=0    failed=0
+
+
